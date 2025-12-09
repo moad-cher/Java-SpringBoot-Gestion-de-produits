@@ -2,39 +2,39 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-        
-    - name: Build with Maven
-      working-directory: ./Gestion_Produit
-      run: mvn clean install -DskipTests
-      
-    - name: Run unit tests
-      working-directory: ./Gestion_Produit
-      run: mvn test -Dtest=!*selenium*
-      
-    - name: Package application
-      working-directory: ./Gestion_Produit
-      run: mvn package -DskipTests
-      
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: app-jar
-        path: Gestion_Produit/target/*.jar
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: maven
+
+      - name: Build with Maven
+        working-directory: ./Gestion_Produit
+        run: mvn clean install -DskipTests
+
+      - name: Run unit tests
+        working-directory: ./Gestion_Produit
+        run: mvn test -Dtest=!*selenium*
+
+      - name: Package application
+        working-directory: ./Gestion_Produit
+        run: mvn package -DskipTests
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-jar
+          path: Gestion_Produit/target/*.jar
