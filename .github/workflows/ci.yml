@@ -35,7 +35,18 @@ jobs:
         working-directory: ./Gestion_Produit
         run: mvn clean install -DskipTests
 
-      - name: Initialize database
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 --silent; then
+              echo "MySQL is ready"
+              break
+            fi
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
+      - name: Initialize test data
         working-directory: ./Gestion_Produit
         run: |
           mysql -h 127.0.0.1 -u root tp < src/main/resources/schema.sql
