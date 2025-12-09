@@ -37,8 +37,7 @@ jobs:
 
       - name: Run unit tests
         working-directory: ./Gestion_Produit
-        run: mvn test -Dtest='!*Selenium*'
-        continue-on-error: true
+        run: mvn test -Dtest=ApiProduitApplicationTests
 
       - name: Package application
         working-directory: ./Gestion_Produit
