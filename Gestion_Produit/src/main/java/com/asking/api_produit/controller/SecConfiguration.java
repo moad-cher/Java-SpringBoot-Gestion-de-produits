@@ -19,7 +19,7 @@ public class SecConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     public Dotenv dotenv() {
-        return Dotenv.configure().filename(".env").load();
+        return Dotenv.configure().filename(".env").ignoreIfMissing().load();
     }
     
 
@@ -48,8 +48,12 @@ public class SecConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         // Configuration de l'authentification
         auth.authenticationProvider(authenticationProvider());
+        String adminPassword = dotenv().get("ADMIN_PASSWORD");
+        if (adminPassword == null) {
+            adminPassword = "admin123"; // Default password for testing
+        }
         auth.inMemoryAuthentication().passwordEncoder(passwordEncoder()).withUser("Charbel")
-                .password(passwordEncoder().encode(dotenv().get("ADMIN_PASSWORD"))).roles("admin");
+                .password(passwordEncoder().encode(adminPassword)).roles("admin");
     }
 
     @Override
