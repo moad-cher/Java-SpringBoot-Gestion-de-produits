@@ -31,6 +31,11 @@ jobs:
           distribution: "temurin"
           cache: maven
 
+      - name: Set up Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
       - name: Build with Maven
         working-directory: ./Gestion_Produit
         run: mvn clean install -DskipTests
@@ -51,9 +56,36 @@ jobs:
         run: |
           mysql -h 127.0.0.1 -u root tp < src/main/resources/schema.sql
 
+      - name: Start Spring Boot application in background
+        working-directory: ./Gestion_Produit
+        run: |
+          mvn spring-boot:run &
+          echo $! > app.pid
+          # Wait for application to start
+          for i in {1..60}; do
+            if curl -s http://localhost:8080 > /dev/null; then
+              echo "Application is ready"
+              break
+            fi
+            echo "Waiting for application to start..."
+            sleep 2
+          done
+
       - name: Run unit tests
         working-directory: ./Gestion_Produit
         run: mvn test -Dtest=ApiProduitApplicationTests
+
+      - name: Run Selenium tests
+        working-directory: ./Gestion_Produit
+        run: mvn test -Dtest=*Selenium*
+
+      - name: Stop Spring Boot application
+        if: always()
+        working-directory: ./Gestion_Produit
+        run: |
+          if [ -f app.pid ]; then
+            kill $(cat app.pid) || true
+          fi
 
       - name: Package application
         working-directory: ./Gestion_Produit
