@@ -38,7 +38,7 @@ jobs:
       - name: Initialize database
         working-directory: ./Gestion_Produit
         run: |
-          mysql -h 127.0.0.1 -u root < src/main/resources/schema.sql
+          mysql -h 127.0.0.1 -u root tp < src/main/resources/schema.sql
 
       - name: Run unit tests
         working-directory: ./Gestion_Produit
