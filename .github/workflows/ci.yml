@@ -58,18 +58,25 @@ jobs:
 
       - name: Start Spring Boot application in background
         working-directory: ./Gestion_Produit
+        env:
+          CI: true
         run: |
-          mvn spring-boot:run &
+          nohup mvn spring-boot:run > app.log 2>&1 &
           echo $! > app.pid
           # Wait for application to start
           for i in {1..60}; do
-            if curl -s http://localhost:8080 > /dev/null; then
+            if curl -s http://localhost:8080 > /dev/null 2>&1; then
               echo "Application is ready"
               break
             fi
-            echo "Waiting for application to start..."
+            echo "Waiting for application to start... ($i/60)"
             sleep 2
           done
+          if ! curl -s http://localhost:8080 > /dev/null 2>&1; then
+            echo "Application failed to start. Last 50 lines of log:"
+            tail -n 50 app.log
+            exit 1
+          fi
 
       - name: Run unit tests
         working-directory: ./Gestion_Produit
@@ -77,7 +84,16 @@ jobs:
 
       - name: Run Selenium tests
         working-directory: ./Gestion_Produit
+        env:
+          CI: true
         run: mvn test -Dtest="com.asking.api_produit.selenium.*Test"
+
+      - name: Show application logs on failure
+        if: failure()
+        working-directory: ./Gestion_Produit
+        run: |
+          echo "=== Application Log ==="
+          tail -n 100 app.log || echo "No log file found"
 
       - name: Stop Spring Boot application
         if: always()
