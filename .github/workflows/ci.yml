@@ -29,12 +29,12 @@ jobs:
         working-directory: ./Gestion_Produit
         run: mvn test -Dtest=!*selenium*
 
-      - name: Package application
-        working-directory: ./Gestion_Produit
-        run: mvn package -DskipTests
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-jar
-          path: Gestion_Produit/target/*.jar
+    - name: Package application
+      working-directory: ./Gestion_Produit
+      run: mvn package -DskipTests
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-jar
+        path: Gestion_Produit/target/*.jar
