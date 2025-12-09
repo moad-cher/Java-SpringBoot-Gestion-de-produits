@@ -17,22 +17,38 @@ public class DeconnexionTest extends BaseSeleniumTest {
     public void testDeconnexion() {
         driver.get(baseUrl + "/listeAvecCon");
 
-        // Chercher et cliquer sur le lien de déconnexion
-        WebElement logoutLink;
-        try {
-            logoutLink = driver.findElement(By.linkText("Déconnexion"));
-        } catch (Exception e) {
-            logoutLink = driver.findElement(By.cssSelector("a[href*='logout']"));
-        }
-        logoutLink.click();
-
-        // Vérifier redirection vers login
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.urlContains("login"),
-                ExpectedConditions.presenceOfElementLocated(By.name("email"))));
 
-        assertTrue(driver.getCurrentUrl().contains("login") ||
-                driver.findElements(By.name("email")).size() > 0);
+        // Cliquer sur le bouton navbar-toggler pour ouvrir le menu mobile
+        try {
+            WebElement navbarToggler = wait
+                    .until(ExpectedConditions.elementToBeClickable(By.className("navbar-toggler")));
+            navbarToggler.click();
+            Thread.sleep(500); // Petite pause pour l'animation
+        } catch (Exception e) {
+            System.out.println("Navbar toggler non trouvé ou déjà ouvert");
+        }
+
+        // Cliquer sur "Se déconnecter" dans le menu
+        WebElement seDeconnecterLink = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//a[contains(text(), 'Se déconnecter') or contains(text(), 'Déconnexion')]")));
+        seDeconnecterLink.click();
+
+        // Attendre et cliquer sur le bouton "Log Out" avec la classe exacte
+        WebElement logoutButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.cssSelector("button.btn.btn-lg.btn-primary.btn-block[type='submit']")));
+        logoutButton.click();
+
+        // Vérifier redirection vers la page d'accueil
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.urlToBe(baseUrl + "/"),
+                ExpectedConditions.presenceOfElementLocated(By.linkText("Se connecter"))));
+
+        String currentUrl = driver.getCurrentUrl();
+        assertTrue(currentUrl.equals(baseUrl + "/") ||
+                driver.findElements(By.linkText("Se connecter")).size() > 0,
+                "Devrait être redirigé vers la page d'accueil après déconnexion");
+
+        System.out.println("✓ Déconnexion réussie, redirigé vers: " + currentUrl);
     }
 }

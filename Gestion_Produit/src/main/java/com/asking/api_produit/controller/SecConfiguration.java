@@ -16,12 +16,10 @@ import io.github.cdimascio.dotenv.Dotenv;
 @EnableWebSecurity
 public class SecConfiguration extends WebSecurityConfigurerAdapter {
 
-
     @Bean
     public Dotenv dotenv() {
         return Dotenv.configure().filename(".env").ignoreIfMissing().load();
     }
-    
 
     // Définition du service de détails de l'utilisateur
     @Bean
