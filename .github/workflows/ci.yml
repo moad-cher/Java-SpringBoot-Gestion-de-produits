@@ -77,7 +77,7 @@ jobs:
 
       - name: Run Selenium tests
         working-directory: ./Gestion_Produit
-        run: mvn test -Dtest="**/*Selenium*Test" -DfailIfNoTests=false
+        run: mvn test -Dtest="com.asking.api_produit.selenium.*Test"
 
       - name: Stop Spring Boot application
         if: always()
