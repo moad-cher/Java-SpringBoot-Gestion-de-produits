@@ -36,6 +36,13 @@ jobs:
         with:
           chrome-version: stable
 
+      - name: Setup display for headless Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          export DISPLAY=:99
+          sudo Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+
       - name: Build with Maven
         working-directory: ./Gestion_Produit
         run: mvn clean install -DskipTests
@@ -86,6 +93,7 @@ jobs:
         working-directory: ./Gestion_Produit
         env:
           CI: true
+          DISPLAY: :99
         run: mvn test -Dtest="com.asking.api_produit.selenium.*Test"
 
       - name: Show application logs on failure

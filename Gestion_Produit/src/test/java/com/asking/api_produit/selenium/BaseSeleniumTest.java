@@ -29,10 +29,14 @@ public abstract class BaseSeleniumTest {
 
         // Add headless mode for CI/CD environments
         if (System.getenv("CI") != null) {
-            options.addArguments("--headless");
+            options.addArguments("--headless=new");
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--disable-gpu");
+            options.addArguments("--disable-extensions");
+            options.addArguments("--disable-software-rasterizer");
+            options.addArguments("--window-size=1920,1080");
+            options.addArguments("--disable-blink-features=AutomationControlled");
         }
 
         driver = new ChromeDriver(options);
