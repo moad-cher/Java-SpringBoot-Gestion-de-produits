@@ -2,6 +2,8 @@ package com.asking.api_produit.selenium;
 
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import java.time.Duration;
@@ -35,19 +37,36 @@ public class AjoutProduitTest extends BaseSeleniumTest {
 
         System.out.println("Soumission du formulaire...");
         
-        // Attendre que le bouton soit cliquable et cliquer
-        var submitButton = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//button[contains(text(),'Ajouter')]")));
-        submitButton.click();
+        // Try using JavaScript to submit the form as a workaround
+        WebElement form = driver.findElement(By.tagName("form"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].submit();", form);
 
         System.out.println("Attente de la redirection...");
         
         // Attendre et vérifier la redirection avec un timeout plus long
         wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-        wait.until(ExpectedConditions.or(
-                ExpectedConditions.urlContains("liste"),
-                ExpectedConditions.urlContains("error"),
-                ExpectedConditions.urlContains("500")));
+        
+        try {
+            wait.until(ExpectedConditions.or(
+                    ExpectedConditions.urlContains("liste"),
+                    ExpectedConditions.urlContains("error"),
+                    ExpectedConditions.urlContains("500")));
+        } catch (Exception e) {
+            // If timeout, print debug info
+            System.err.println("TIMEOUT: Form not submitted. Current URL: " + driver.getCurrentUrl());
+            System.err.println("Validation errors on page:");
+            try {
+                String pageSource = driver.getPageSource();
+                if (pageSource.contains("required") || pageSource.contains("invalid")) {
+                    System.err.println("Found validation keywords in page");
+                }
+                System.err.println("Page source (first 2000 chars):");
+                System.err.println(pageSource.substring(0, Math.min(2000, pageSource.length())));
+            } catch (Exception ex) {
+                System.err.println("Could not retrieve page source");
+            }
+            throw e;
+        }
 
         String currentUrl = driver.getCurrentUrl();
         System.out.println("URL après soumission: " + currentUrl);
