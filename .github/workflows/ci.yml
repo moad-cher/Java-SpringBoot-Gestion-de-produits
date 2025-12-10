@@ -111,11 +111,20 @@ jobs:
         working-directory: ./tests-codeception
         run: vendor/bin/codecept build
 
-      - name: Start ChromeDriver for Codeception
+      - name: Start Selenium Server
         run: |
-          chromedriver --port=9515 > /dev/null 2>&1 &
-          echo $! > chromedriver.pid
-          sleep 2
+          wget -q https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.16.0/selenium-server-4.16.1.jar
+          java -jar selenium-server-4.16.1.jar standalone --port 4444 > selenium.log 2>&1 &
+          echo $! > selenium.pid
+          # Wait for Selenium to be ready
+          for i in {1..30}; do
+            if curl -s http://localhost:4444/status > /dev/null 2>&1; then
+              echo "Selenium Server is ready"
+              break
+            fi
+            echo "Waiting for Selenium Server... ($i/30)"
+            sleep 2
+          done
 
       - name: Run Codeception functional tests
         working-directory: ./tests-codeception
