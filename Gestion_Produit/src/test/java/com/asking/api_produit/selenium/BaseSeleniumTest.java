@@ -23,14 +23,17 @@ public abstract class BaseSeleniumTest {
     @BeforeAll
     public void setUpOnce() {
         System.out.println("Setting up Chrome driver...");
-        
+
         // Only use WebDriverManager locally
         if (System.getenv("CI") == null) {
             WebDriverManager.chromedriver().setup();
         }
-        
+
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--remote-allow-origins=*");
+        
+        // Set capability to automatically dismiss alerts
+        options.setCapability("unhandledPromptBehavior", "dismiss");
 
         // Add headless mode for CI/CD environments
         if (System.getenv("CI") != null) {
@@ -67,6 +70,14 @@ public abstract class BaseSeleniumTest {
             System.out.println("Navigating to login page: " + baseUrl + "/login");
             driver.get(baseUrl + "/login");
 
+            // Check and dismiss any existing alerts
+            try {
+                driver.switchTo().alert().dismiss();
+                System.out.println("Dismissed existing alert");
+            } catch (Exception ignored) {
+                // No alert present, continue
+            }
+
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.name("email")));
 
@@ -74,6 +85,15 @@ public abstract class BaseSeleniumTest {
             driver.findElement(By.name("email")).sendKeys("Charbel");
             driver.findElement(By.name("password")).sendKeys("admin123");
             driver.findElement(By.cssSelector("button[type='submit']")).click();
+
+            // Handle any alert that appears after login
+            Thread.sleep(1000);
+            try {
+                driver.switchTo().alert().dismiss();
+                System.out.println("Dismissed alert after login attempt");
+            } catch (Exception ignored) {
+                // No alert present, continue
+            }
 
             System.out.println("Waiting for redirect after login...");
             wait.until(ExpectedConditions.urlContains("/liste"));
