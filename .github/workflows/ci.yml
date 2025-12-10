@@ -111,10 +111,15 @@ jobs:
         working-directory: ./tests-codeception
         run: vendor/bin/codecept build
 
-      - name: Start Selenium Server
+      - name: Start Selenium Server with Chrome
         run: |
+          # Download Selenium Server
           wget -q https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.16.0/selenium-server-4.16.1.jar
-          java -jar selenium-server-4.16.1.jar standalone --port 4444 > selenium.log 2>&1 &
+          # Start Selenium with Chrome options
+          java -jar selenium-server-4.16.1.jar standalone \
+            --port 4444 \
+            --selenium-manager true \
+            > selenium.log 2>&1 &
           echo $! > selenium.pid
           # Wait for Selenium to be ready
           for i in {1..30}; do
