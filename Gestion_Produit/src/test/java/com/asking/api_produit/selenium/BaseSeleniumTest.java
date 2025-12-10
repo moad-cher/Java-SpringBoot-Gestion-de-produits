@@ -87,10 +87,12 @@ public abstract class BaseSeleniumTest {
             driver.findElement(By.cssSelector("button[type='submit']")).click();
 
             // Handle any alert that appears after login
-            Thread.sleep(1000);
             try {
+                Thread.sleep(1000);
                 driver.switchTo().alert().dismiss();
                 System.out.println("Dismissed alert after login attempt");
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
             } catch (Exception ignored) {
                 // No alert present, continue
             }
