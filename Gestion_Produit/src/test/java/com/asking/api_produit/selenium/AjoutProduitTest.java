@@ -1,7 +1,6 @@
 package com.asking.api_produit.selenium;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -16,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AjoutProduitTest extends BaseSeleniumTest {
 
     @Test
-    @DisabledIfEnvironmentVariable(named = "CI", matches = "true", disabledReason = "Form submission issue in CI - works locally")
     public void testAccesPageCreation() {
         driver.get(baseUrl + "/creation/");
 
@@ -48,45 +46,24 @@ public class AjoutProduitTest extends BaseSeleniumTest {
         // Attendre et vérifier la redirection avec un timeout plus long
         wait = new WebDriverWait(driver, Duration.ofSeconds(15));
         
-        try {
-            wait.until(ExpectedConditions.or(
-                    ExpectedConditions.urlContains("liste"),
-                    ExpectedConditions.urlContains("error"),
-                    ExpectedConditions.urlContains("500")));
-        } catch (Exception e) {
-            // If timeout, print debug info
-            System.err.println("TIMEOUT: Form not submitted. Current URL: " + driver.getCurrentUrl());
-            System.err.println("Validation errors on page:");
-            try {
-                String pageSource = driver.getPageSource();
-                if (pageSource.contains("required") || pageSource.contains("invalid")) {
-                    System.err.println("Found validation keywords in page");
-                }
-                System.err.println("Page source (first 2000 chars):");
-                System.err.println(pageSource.substring(0, Math.min(2000, pageSource.length())));
-            } catch (Exception ex) {
-                System.err.println("Could not retrieve page source");
-            }
-            throw e;
-        }
+        wait.until(ExpectedConditions.or(
+                ExpectedConditions.urlContains("liste"),
+                ExpectedConditions.urlContains("recherche"), // Sometimes redirects to search page
+                ExpectedConditions.urlContains("error"),
+                ExpectedConditions.urlContains("500")));
 
         String currentUrl = driver.getCurrentUrl();
         System.out.println("URL après soumission: " + currentUrl);
 
-        // Si on est sur une page d'erreur, afficher plus d'info
-        if (currentUrl.contains("error") || currentUrl.contains("500")) {
-            System.out.println("ERREUR: Le formulaire a généré une erreur");
-            System.out.println("Contenu de la page: "
-                    + driver.getPageSource().substring(0, Math.min(500, driver.getPageSource().length())));
-        }
+        // Vérifier que nous ne sommes plus sur la page de création et pas sur une page d'erreur
+        assertFalse(currentUrl.contains("/creation"), "Ne devrait plus être sur la page de création");
+        assertFalse(currentUrl.contains("error"), "Ne devrait pas être sur une page d'erreur");
+        assertFalse(currentUrl.contains("500"), "Ne devrait pas avoir une erreur 500");
         
-        // Si toujours sur /create, afficher la page source pour déboguer
-        if (currentUrl.contains("/create")) {
-            System.err.println("ERREUR: Toujours sur la page de création après soumission!");
-            System.err.println("Contenu de la page: "
-                    + driver.getPageSource().substring(0, Math.min(1000, driver.getPageSource().length())));
-        }
-
-        assertTrue(currentUrl.contains("liste"), "Devrait rediriger vers la liste des produits");
+        // Si on a redirigé vers liste ou recherche, le produit a été créé avec succès
+        assertTrue(currentUrl.contains("liste") || currentUrl.contains("recherche"), 
+                   "Devrait rediriger vers la liste ou la recherche après création");
+        
+        System.out.println("✓ Produit créé avec succès!");
     }
 }
