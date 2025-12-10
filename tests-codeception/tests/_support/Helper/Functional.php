@@ -7,13 +7,4 @@ namespace Tests\Support\Helper;
 
 class Functional extends \Codeception\Module
 {
-    public function loginAsAdmin()
-    {
-        $I = $this->getModule('WebDriver');
-        $I->amOnPage('/login');
-        $I->fillField('email', 'Charbel');
-        $I->fillField('password', 'admin123');
-        $I->click('button[type="submit"]');
-        $I->waitForElement('table', 10); // Wait for liste page
-    }
 }

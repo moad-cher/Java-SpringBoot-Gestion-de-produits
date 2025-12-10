@@ -8,7 +8,12 @@ class ListingProduitCest
 {
     public function _before(FunctionalTester $I)
     {
-        $I->loginAsAdmin();
+        // Login as admin
+        $I->amOnPage('/login');
+        $I->fillField('email', 'Charbel');
+        $I->fillField('password', 'admin123');
+        $I->click('button[type="submit"]');
+        $I->waitForElement('table', 10);
     }
 
     // tests
