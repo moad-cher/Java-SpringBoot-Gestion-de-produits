@@ -27,7 +27,7 @@ public class AjoutProduitTest extends BaseSeleniumTest {
         driver.findElement(By.name("prix")).sendKeys("99");
         driver.findElement(By.name("devise")).sendKeys("EUR");
         driver.findElement(By.name("taxe")).sendKeys("20");
-        driver.findElement(By.name("dateExpiration")).sendKeys("31/12/2025");
+        driver.findElement(By.name("dateExpiration")).sendKeys("2025-12-31"); // Format YYYY-MM-DD pour input type="date"
         driver.findElement(By.name("fournisseur")).sendKeys("Test Fournisseur");
 
         // Ne pas remplir le champ image - laisser vide pour que le formulaire utilise
