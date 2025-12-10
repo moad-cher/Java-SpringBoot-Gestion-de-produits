@@ -22,6 +22,7 @@ public abstract class BaseSeleniumTest {
 
     @BeforeAll
     public void setUpOnce() {
+        System.out.println("Setting up Chrome driver...");
         WebDriverManager.chromedriver().setup();
 
         ChromeOptions options = new ChromeOptions();
@@ -29,22 +30,26 @@ public abstract class BaseSeleniumTest {
 
         // Add headless mode for CI/CD environments
         if (System.getenv("CI") != null) {
+            System.out.println("Running in CI mode with headless Chrome");
             options.addArguments("--headless=new");
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--disable-gpu");
-            options.addArguments("--disable-extensions");
-            options.addArguments("--disable-software-rasterizer");
             options.addArguments("--window-size=1920,1080");
-            options.addArguments("--disable-blink-features=AutomationControlled");
+            options.addArguments("--single-process");
+            options.addArguments("--disable-setuid-sandbox");
         }
 
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        driver.manage().window().maximize();
+        if (System.getenv("CI") == null) {
+            driver.manage().window().maximize();
+        }
 
         // Se connecter une seule fois
+        System.out.println("Logging in to application...");
         login();
+        System.out.println("Setup complete, ready for tests");
     }
 
     @AfterAll
@@ -55,15 +60,25 @@ public abstract class BaseSeleniumTest {
     }
 
     private void login() {
-        driver.get(baseUrl + "/login");
+        try {
+            System.out.println("Navigating to login page: " + baseUrl + "/login");
+            driver.get(baseUrl + "/login");
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.name("email")));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.name("email")));
 
-        driver.findElement(By.name("email")).sendKeys("Charbel");
-        driver.findElement(By.name("password")).sendKeys("admin123");
-        driver.findElement(By.cssSelector("button[type='submit']")).click();
+            System.out.println("Filling login form...");
+            driver.findElement(By.name("email")).sendKeys("Charbel");
+            driver.findElement(By.name("password")).sendKeys("admin123");
+            driver.findElement(By.cssSelector("button[type='submit']")).click();
 
-        wait.until(ExpectedConditions.urlContains("/liste"));
+            System.out.println("Waiting for redirect after login...");
+            wait.until(ExpectedConditions.urlContains("/liste"));
+            System.out.println("Login successful, current URL: " + driver.getCurrentUrl());
+        } catch (Exception e) {
+            System.err.println("Login failed: " + e.getMessage());
+            System.err.println("Current URL: " + driver.getCurrentUrl());
+            throw e;
+        }
     }
 }
