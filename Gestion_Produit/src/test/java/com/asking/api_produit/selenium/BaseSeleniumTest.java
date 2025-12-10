@@ -23,8 +23,12 @@ public abstract class BaseSeleniumTest {
     @BeforeAll
     public void setUpOnce() {
         System.out.println("Setting up Chrome driver...");
-        WebDriverManager.chromedriver().setup();
-
+        
+        // Only use WebDriverManager locally
+        if (System.getenv("CI") == null) {
+            WebDriverManager.chromedriver().setup();
+        }
+        
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--remote-allow-origins=*");
 
@@ -36,12 +40,11 @@ public abstract class BaseSeleniumTest {
             options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--disable-gpu");
             options.addArguments("--window-size=1920,1080");
-            options.addArguments("--single-process");
-            options.addArguments("--disable-setuid-sandbox");
         }
 
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
         if (System.getenv("CI") == null) {
             driver.manage().window().maximize();
         }

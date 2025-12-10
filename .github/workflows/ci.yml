@@ -36,6 +36,14 @@ jobs:
         with:
           chrome-version: stable
 
+      - name: Set up ChromeDriver
+        uses: nanasess/setup-chromedriver@v2
+        
+      - name: Verify Chrome setup
+        run: |
+          google-chrome --version
+          chromedriver --version
+
       - name: Build with Maven
         working-directory: ./Gestion_Produit
         run: mvn clean install -DskipTests
