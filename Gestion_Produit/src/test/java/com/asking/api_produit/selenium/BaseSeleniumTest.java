@@ -31,7 +31,7 @@ public abstract class BaseSeleniumTest {
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--remote-allow-origins=*");
-        
+
         // Set capability to automatically dismiss alerts
         options.setCapability("unhandledPromptBehavior", "dismiss");
 
