@@ -111,6 +111,12 @@ jobs:
         working-directory: ./tests-codeception
         run: vendor/bin/codecept build
 
+      - name: Start ChromeDriver for Codeception
+        run: |
+          chromedriver --port=9515 > /dev/null 2>&1 &
+          echo $! > chromedriver.pid
+          sleep 2
+
       - name: Run Codeception functional tests
         working-directory: ./tests-codeception
         run: vendor/bin/codecept run functional --steps
