@@ -96,6 +96,25 @@ jobs:
           CI: true
         run: mvn test -Dtest="com.asking.api_produit.selenium.*Test"
 
+      - name: Setup PHP for Codeception
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, intl
+          tools: composer:v2
+
+      - name: Install Codeception dependencies
+        working-directory: ./tests-codeception
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Build Codeception support classes
+        working-directory: ./tests-codeception
+        run: vendor/bin/codecept build
+
+      - name: Run Codeception functional tests
+        working-directory: ./tests-codeception
+        run: vendor/bin/codecept run functional --steps
+
       - name: Show application logs on failure
         if: failure()
         working-directory: ./Gestion_Produit
